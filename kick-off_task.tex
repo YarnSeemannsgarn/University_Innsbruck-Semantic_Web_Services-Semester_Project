@@ -31,6 +31,8 @@
 \allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
 
 \usepackage{fancyhdr} % Custom headers and footers
+\usepackage{hyperref}
+
 \pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
 \fancyhead{} % No page header - if you want one, create it in the same way as the footers below
 \fancyfoot[L]{} % Empty left footer
@@ -73,12 +75,38 @@
 %----------------------------------------------------------------------------------------
 
 \section{Project description}
+\label{sec:project_description}
+
+The project goal is to build a JSON-LD generator as a form based tool similiar to the \href{http://www.ldodds.com/foaf/foaf-a-matic}{FOAF-o-matic} tool. To reach this the latest JSON-LD syntax described in \href{https://www.w3.org/TR/json-ld/}{https://\allowbreak{}www.\allowbreak{}w3.\allowbreak{}org/\allowbreak{}TR/\allowbreak{}json-ld/} will be used. The generator should generate the \href{http://schema.org}{http://schema.org} types and their properties which are listed in chapter \ref{sec:types_and_properties}. All of them are in the context of a touristic service.\\
+\\
+There are already similiar generators like \href{https://www.jamesdflynn.com/development/json-ld-markup-generator/}{https://\allowbreak{}www.\allowbreak{}jamesdflynn.\allowbreak{}com/\allowbreak{}development/\allowbreak{}json-ld-markup-generator/}, which will help to get an idea for the final implementation. More implementation details are mentioned in chapter \ref{sec:implementation_details}.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
 %----------------------------------------------------------------------------------------
 
 \section{Selected schema.org types and properties}
+\label{sec:types_and_properties}
+
+The following types with their properties can be generated with the JSON-LD generator:
+
+\begin{description}
+\item[\href{https://schema.org/Event}{Event}] The Event type is necessary in the context of tourism, because there are a lot of events like festivals which can be part of a touristic service. It combines locations and times.
+\item[\href{https://schema.org/Place}{Place}] Places define where a touristic service takes place. They are also required for the event type. The two most important more specific places for this project are \href{https://schema.org/LocalBusiness}{LocalBusiness} and \href{https://schema.org/TouristAttraction}{TouristAttraction}.
+\item[\href{https://schema.org/Review}{Review}] Reviews are necessary to evaluate and to choose a touristic service.
+\item[\href{https://schema.org/Offer}{Offer}] Offers are entities ``to transfer some rights to an item or to provide a service'', so they fit perfectly for the project.
+\item[\href{https://schema.org/Person}{Person}] Persons utilise touristic services.
+\item[\href{https://schema.org/Organization}{Organization}] Organizations offer touristic services. One important more specific type is also the \href{https://schema.org/LocalBusiness}{LocalBusiness} type.
+\end{description}
+
+%----------------------------------------------------------------------------------------
+%	SECTION 3
+%----------------------------------------------------------------------------------------
+
+\section{Implementation details}
+\label{sec:implementation_details}
+
+The current project state will be managed via Git on GitHub (\href{https://github.com/YarnSeemannsgarn/University_Innsbuck-Semantic_Web_Services-Semester_Project}{https://\allowbreak{}github.\allowbreak{}com/\allowbreak{}YarnSeemannsgarn/\allowbreak{}University\_Innsbuck-\allowbreak{}Semantic\_Web\_Services-\allowbreak{}Semester\_Project}).
 
 %------------------------------------------------
 
