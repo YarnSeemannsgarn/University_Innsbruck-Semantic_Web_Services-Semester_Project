@@ -14,10 +14,6 @@ function Schema(obj) // CONSTRUCTOR CAN BE OVERLOADED WITH AN OBJECT
 }
 
 
-}
-
-
-
 
 var Schema = new Schema(JSON.parse('{"a":4,"b":3}'));
 
