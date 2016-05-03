@@ -1,13 +1,21 @@
+// TODO: Add more fields
+function Event() {
+    this.name = null;
+    this.description = null;
+}
+
 $( "#sel-thing" ).change(function() {
     // Remove precreated input fields
     $(".input-field").remove();
 
     // What was selected
-    alert($( "#sel-thing option:selected" ).text() + " was selected");
-
-    // Create input fields 
     // TODO: make generic
-    $("#container").append("<input type=\"text\" class=\"form-control input-field\">");
+    if ($( "#sel-thing option:selected" ).text() == "Event") {
+	var event = new Event();
+	for(var propt in event){
+	    $("#container").append("<input type=\"text\" class=\"form-control input-field\">");
+	}
+    }
 });
 
 
