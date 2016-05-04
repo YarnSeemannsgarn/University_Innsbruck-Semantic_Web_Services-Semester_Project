@@ -1,20 +1,37 @@
-function Schema(obj) // CONSTRUCTOR CAN BE OVERLOADED WITH AN OBJECT
+/*
+ *
+ *
+ * We will create schema class using extend function
+ *
+ *
+ */
+
+function Schema(obj)
 {
-   
-    // IF AN OBJECT WAS PASSED THEN INITIALISE PROPERTIES FROM THAT OBJECT
-	for (var prop in obj)
-	{	
-	   if (obj.hasOwnProperty(prop)) 
-	   {
-		   this[prop] = obj[prop];
-		}
-	}
-   
-  
+     $.extend(this, obj);    
+}
+
+
+Schema.prototype.callMeMaybe = function(){
+    console.log(this);
 }
 
 
 
-var Schema = new Schema(JSON.parse('{"a":4,"b":3}'));
+/*
+ *
+ *
+ * Loading schema.org objects from jsonld
+ *
+ *
+ */
+$.getJSON('/../src/schema/tree.jsonld', {format: "json"}, function( json ) {
+    	
+    	var schema = new Schema(json);
+    	schema.callMeMaybe();
+    	
+  	})
+  	.fail(function( jqxhr, textStatus, error ) {
 
-console.log(Schema);
+  		alert("unable to load jsonld!");
+});
