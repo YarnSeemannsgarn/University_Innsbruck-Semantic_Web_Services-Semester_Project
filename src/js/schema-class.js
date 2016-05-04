@@ -21,21 +21,3 @@ Schema.prototype.getChildren = function(){
 }
 
 
-
-/*
- *
- *
- * Loading schema.org objects from jsonld
- *
- *
- */
-$.getJSON('/../src/schema/tree.jsonld', {format: "json"}, function( json ) {
-    	
-    	var schema = new Schema(json);
-    	console.log(schema.getChildren());
-    	
-  	})
-  	.fail(function( jqxhr, textStatus, error ) {
-
-  		alert("unable to load jsonld!");
-});
