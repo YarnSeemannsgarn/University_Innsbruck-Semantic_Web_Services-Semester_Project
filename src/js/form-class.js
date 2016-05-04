@@ -1,4 +1,3 @@
-
 /*
  *
  *
@@ -6,14 +5,23 @@
  *
  *
  */
-
-
 var Form = new function ()
 	{
+		/*
+		 *
+		 *
+		 * For creating dynamic list
+		 *
+		 *
+		 */
 		this.createList = function (list)
 		{
 			for (var key in list)
 			{
+				//for testing
+				console.log(list[key]);
+				
+				/*
 				// skip loop if the property is from prototype
 				if (!list.hasOwnProperty(key)) continue;
 				var obj = list[key];
@@ -24,6 +32,7 @@ var Form = new function ()
 					// your code
 					console.log(prop + " = " + obj[prop]);
 				}
+				*/
 			}
 		};
 	}
