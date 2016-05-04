@@ -16,6 +16,10 @@ Schema.prototype.callMeMaybe = function(){
     console.log(this);
 }
 
+Schema.prototype.getChildren = function(){
+	return this.children;
+}
+
 
 
 /*
@@ -28,7 +32,7 @@ Schema.prototype.callMeMaybe = function(){
 $.getJSON('/../src/schema/tree.jsonld', {format: "json"}, function( json ) {
     	
     	var schema = new Schema(json);
-    	schema.callMeMaybe();
+    	console.log(schema.getChildren());
     	
   	})
   	.fail(function( jqxhr, textStatus, error ) {
