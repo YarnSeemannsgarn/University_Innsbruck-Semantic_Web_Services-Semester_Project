@@ -6,18 +6,21 @@
  *
  */
 
-function Schema(obj)
+function Schema()
 {
-     $.extend(this, obj);    
+         
 }
 
+Schema.prototype.addJSON = function(obj){
+    $.extend(this, obj);
+}
 
 Schema.prototype.callMeMaybe = function(){
     console.log(this);
 }
 
-Schema.prototype.getChildren = function(){
-	return this.children;
+Schema.prototype.getType = function(type){
+	return this.types[type];
 }
 
 
