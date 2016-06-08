@@ -27,7 +27,7 @@ $("#sel-thing").change(function ()
  */
  
  
-$.getJSON('/../src/schema/schema.json', {
+$.getJSON('./../src/schema/schema.json', {
 	format: "json"
 }, function (json)
 {
