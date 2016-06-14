@@ -20,7 +20,7 @@ $("#sel-thing").change(function ()
 	
 		$.each(type.properties, function(key, value) {
 			//display the key and value pair
-			$("#json-ld-container").append("<div class=\"form-group deleatable\"><label for=\"" + value + key + "\">" + capitalizeFirstLetter(value) + ":</label><input type=\"text\" class=\"form-control\" id=\"" + value + key + "\"></div>");
+			$("#left-column").append("<div class=\"form-group deleatable\"><label for=\"" + value + key + "\">" + capitalizeFirstLetter(value) + ":</label><input type=\"text\" class=\"form-control\" id=\"" + value + key + "\"></div>");
 				
 		});
 });
