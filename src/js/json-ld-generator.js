@@ -1,3 +1,10 @@
+// Enable materialize selects
+// Found here: http://stackoverflow.com/questions/28258106/materialize-css-select-doesnt-seem-to-render
+$(document).ready(function() {
+    $('select').material_select();
+});
+
+// Load schema
 var Schema = new Schema();
 
 $("#sel-thing").change(function ()
@@ -13,7 +20,7 @@ $("#sel-thing").change(function ()
 	
 		$.each(type.properties, function(key, value) {
 			//display the key and value pair
-			$("#container").append("<div class=\"form-group deleatable\"><label for=\"" + value + key + "\">" + capitalizeFirstLetter(value) + ":</label><input type=\"text\" class=\"form-control\" id=\"" + value + key + "\"></div>");
+			$("#json-ld-container").append("<div class=\"form-group deleatable\"><label for=\"" + value + key + "\">" + capitalizeFirstLetter(value) + ":</label><input type=\"text\" class=\"form-control\" id=\"" + value + key + "\"></div>");
 				
 		});
 });
