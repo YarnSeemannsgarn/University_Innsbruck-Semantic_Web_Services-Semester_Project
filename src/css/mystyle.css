@@ -1,3 +1,7 @@
 #json-ld-header {
     padding: 20px 11px 20px 11px;
 }
+
+#json-ld-col {
+    white-space: pre-wrap;
+}

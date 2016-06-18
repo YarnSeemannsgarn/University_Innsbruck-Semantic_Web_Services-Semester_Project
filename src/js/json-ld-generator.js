@@ -6,7 +6,7 @@ $(document).ready(function() {
 // Load schema
 var Schema = new Schema();
 
-// What happens when a schema.org Thing gets selected
+// Create property input fields when a schema.org thing is selected
 $("#sel-thing").change(function () {
     // Remove precreated input fields
     $(".properties-row").remove();
@@ -24,15 +24,30 @@ $("#sel-thing").change(function () {
 	}
 	newRow = !newRow;
 
-	$(".properties-row").last().append("<div class=\"col s6\">" +
-					   "<label for=\"" + value + "\">" + 
-					   capitalizeFirstLetter(value) + ":" + 
-					   "</label>" +
-					   "<input type=\"text\" id=\"" + value +"\">" +
-					   "</div>");
+	$(".properties-row").last().append(
+	    "<div class=\"col s6\">" +
+		"<label for=\"" + value + "\">" + 
+		capitalizeFirstLetter(value) + ":" + 
+		"</label>" +
+		"<input type=\"text\" id=\"" + value +"\">" +
+		"</div>");
     });
     $("#properties-col").animate({opacity: 1.0}, 1000);
+
+    // Create JSON-LD on change
+    $(".properties-row").keypress(function() {
+	var selected = $("#sel-thing option:selected").text();
+	if ($("#json-ld-col").text().trim() == "{}") {
+	   $("#json-ld-col").text(
+	       "{\n" +
+		   "\t\"@context\": \"http://www.schema.org\"\n" +
+		   "\t\"@type\": \"" + selected + "\"\n" +
+		   "}"); 
+	}
+    });
 });
+
+
 
 /*
  *
