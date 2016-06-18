@@ -1,5 +1,4 @@
 // Enable materialize selects
-// Found here: http://stackoverflow.com/questions/28258106/materialize-css-select-doesnt-seem-to-render
 $(document).ready(function() {
     $('select').material_select();
 });
@@ -7,24 +6,32 @@ $(document).ready(function() {
 // Load schema
 var Schema = new Schema();
 
+// What happens when a schema.org Thing gets selected
 $("#sel-thing").change(function () {
     // Remove precreated input fields
-    $(".deleatable").remove();
+    $(".properties-row").remove();
 
-    // What was selected
+    // Load schema of selected Thing
     var choosen = $("#sel-thing option:selected").text();
     var type = Schema.getType(choosen);
+
+    // Visualize each property
     $("#left-column").css("opacity", "0.0");
     var newRow = true;
     $.each(type.properties, function(key, value) {
 	if (newRow) {
-	    $("#left-column").append("<div class=\"row properties-row deleatable\"></div>");
+	    $("#properties-col").append("<div class=\"row properties-row\"></div>");
 	}
 	newRow = !newRow;
-	//display the key and value pair
-	$(".properties-row").last().append("<div class=\"col s6 form-group\"><label for=\"" + value + key + "\">" + capitalizeFirstLetter(value) + ":</label><input type=\"text\" class=\"form-control\" id=\"" + value + key + "\"></div>");
+
+	$(".properties-row").last().append("<div class=\"col s6\">" +
+					   "<label for=\"" + value + "\">" + 
+					   capitalizeFirstLetter(value) + ":" + 
+					   "</label>" +
+					   "<input type=\"text\" id=\"" + value +"\">" +
+					   "</div>");
     });
-    $("#left-column").animate({opacity: 1.0}, 1000);
+    $("#properties-col").animate({opacity: 1.0}, 1000);
 });
 
 /*
@@ -55,9 +62,3 @@ $.getJSON('./../src/schema/schema.json', {format: "json"}, function (json) {
 }).fail(function (jqxhr, textStatus, error) {
     alert("unable to load jsonld!");
 });
-
-
-
-
-
-
