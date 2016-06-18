@@ -29,21 +29,34 @@ $("#sel-thing").change(function () {
 		"<label for=\"" + value + "\">" + 
 		capitalizeFirstLetter(value) + ":" + 
 		"</label>" +
-		"<input type=\"text\" id=\"" + value +"\">" +
+		"<input type=\"text\" class=\"property\" id=\"" + value +"\">" +
 		"</div>");
     });
     $("#properties-col").animate({opacity: 1.0}, 1000);
 
     // Create JSON-LD on change
-    $(".properties-row").keypress(function() {
+    $(".property").keyup(function(event) {
 	var selected = $("#sel-thing option:selected").text();
-	if ($("#json-ld-col").text().trim() == "{}") {
-	   $("#json-ld-col").text(
-	       "{\n" +
-		   "\t\"@context\": \"http://www.schema.org\"\n" +
-		   "\t\"@type\": \"" + selected + "\"\n" +
-		   "}"); 
+	var jsonLDCol = $("#json-ld-col");
+	var jsonText = jsonLDCol.text().trim();
+	var json = JSON.parse(jsonText);
+
+	if (jsonText == "{}") {
+	    json["@context"] = "http://www.schema.org";
+	    json["@type"] = selected;
 	}
+	
+	// Set property value in JSON
+	var property = $(this).attr('id');
+	if ($(this).val().length == 0) {
+	    delete json[property];
+	} else {
+	    var text = $(this).val();
+	    json[property] = text;
+	}
+	
+	// Render JSON
+	$("#json-ld-col").text(JSON.stringify(json, undefined, 4));
     });
 });
 
