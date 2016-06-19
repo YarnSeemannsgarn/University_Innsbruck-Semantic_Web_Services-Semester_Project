@@ -59,7 +59,8 @@ $("#sel-thing").change(function () {
 
 	// Add datehandler for dates
 	var dataTypes = schema.getPropertyDataTypes(value);
-	if ($.inArray("Date", dataTypes) != -1) {
+	if (($.inArray("Date", dataTypes) !== -1) ||
+	    ($.inArray("DateTime", dataTypes) !== -1)) {
 	    var property = $("#" + value);
 	    property.pickadate({
 		format: 'yyyy-mm-dd', // ISO 8601 due to https://schema.org/Date
