@@ -1,10 +1,7 @@
 /*
  * We will create schema class using extend function
  */
-function Schema()
-{
-         
-}
+function Schema() {}
 
 Schema.prototype.addJSON = function(obj){
     $.extend(this, obj);
@@ -15,7 +12,9 @@ Schema.prototype.callMeMaybe = function(){
 }
 
 Schema.prototype.getType = function(type){
-	return this.types[type];
+    return this.types[type];
 }
 
-
+Schema.prototype.getPropertyDataTypes = function(property) {
+    return this.properties[property].ranges;
+}
