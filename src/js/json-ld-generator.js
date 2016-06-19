@@ -2,18 +2,17 @@
 $(document).ready(function() {
     $('select').material_select();
 });
-
-
+        
 /*
  * Loading schema.org objects from jsonld on webpage start
  */
-var Schema = new Schema();
+var schema = new Schema();
 $.getJSON('./../src/schema/schema.json', {format: "json"}, function (json) {
     /**
        creating Schema from received json
     **/
     
-    Schema.addJSON(json);
+    schema.addJSON(json);
     //console.log(Schema);
     /**
        getting childrens from schema, childrens are subclases of schema
@@ -38,7 +37,7 @@ $("#sel-thing").change(function () {
 
     // Load schema of selected Thing
     var choosen = $("#sel-thing option:selected").text();
-    var type = Schema.getType(choosen);
+    var type = schema.getType(choosen);
 
     // Visualize each property
     $("#properties-col").css("opacity", "0.0");
@@ -48,14 +47,36 @@ $("#sel-thing").change(function () {
 	    $("#properties-col").append("<div class=\"row properties-row\"></div>");
 	}
 	newRow = !newRow;
+	
+	// Define input field
+	var input = "<input type=\"text\" id=\"" + value + "\" class=\"property"
+	var dataTypes = schema.getPropertyDataTypes(value);
+	if ($.inArray("Date", dataTypes) != -1) {
+	    input += " datepicker";
+	}
+	input += "\">";
 
+	// Add input field
 	$(".properties-row").last().append(
 	    "<div class=\"col s6\">" +
 		"<label for=\"" + value + "\">" + 
 		capitalizeFirstLetter(value) + ":" + 
 		"</label>" +
-		"<input type=\"text\" class=\"property\" id=\"" + value +"\">" +
+		input +
 		"</div>");
+
+	// Add datehandler
+	if ($.inArray("Date", dataTypes) != -1) {
+	    var property = $("#" + value);
+	    $('.datepicker').pickadate({
+		format: 'dd-mm-yyyy',
+		selectYears: true,
+		selectMonths: true,
+		onClose: function() { 
+		    propertyChanges(property);
+		}
+	    });	 
+	};   
     });
     $("#properties-col").animate({opacity: 1.0}, 1000);
     
@@ -64,28 +85,28 @@ $("#sel-thing").change(function () {
     var json = { "@context": "http://schema.org",  "@type": selected };
     $("#json-ld-col").text(JSON.stringify(json, undefined, 4));
 
-    propertyChanges();
+    $(".property").keyup(function(event) {
+	propertyChanges($(this));
+    });
 });
 
 
 /*
  * Create JSON-LD on change
  */
-function propertyChanges() {
-    $(".property").keyup(function(event) {
-	var jsonText =  $("#json-ld-col").text().trim();
-	var json = JSON.parse(jsonText);
+function propertyChanges(elem) {
+    var jsonText =  $("#json-ld-col").text().trim();
+    var json = JSON.parse(jsonText);
 
-	// Set property value in JSON
-	var property = $(this).attr('id');
-	if ($(this).val().length == 0) {
-	    delete json[property];
-	} else {
-	    var text = $(this).val();
-	    json[property] = text;
-	}
-	
-	// Render JSON
-	$("#json-ld-col").text(JSON.stringify(json, undefined, 4));
-    });
+    // Set property value in JSON
+    var property = elem.attr('id');
+    if (elem.val().length == 0) {
+	delete json[property];
+    } else {
+	var text = elem.val();
+	json[property] = text;
+    }
+    
+    // Render JSON
+    $("#json-ld-col").text(JSON.stringify(json, undefined, 4));
 }
