@@ -3,10 +3,35 @@ $(document).ready(function() {
     $('select').material_select();
 });
 
-// Load schema
-var Schema = new Schema();
 
-// Create property input fields when a schema.org thing is selected
+/*
+ * Loading schema.org objects from jsonld on webpage start
+ */
+var Schema = new Schema();
+$.getJSON('./../src/schema/schema.json', {format: "json"}, function (json) {
+    /**
+       creating Schema from received json
+    **/
+    
+    Schema.addJSON(json);
+    //console.log(Schema);
+    /**
+       getting childrens from schema, childrens are subclases of schema
+    **/
+    //types = schema.getType("Event");
+    //console.log(types);
+    /**
+       creating list of options based on schema types
+    **/
+    //Form.createList(types);
+}).fail(function (jqxhr, textStatus, error) {
+    alert("unable to load jsonld!");
+});
+
+
+/*
+ * Create property input fields when a schema.org thing is selected
+ */
 $("#sel-thing").change(function () {
     // Remove precreated input fields
     $(".properties-row").remove();
@@ -33,19 +58,24 @@ $("#sel-thing").change(function () {
 		"</div>");
     });
     $("#properties-col").animate({opacity: 1.0}, 1000);
+    
+    // Initial JSON-LD
+    var selected = $("#sel-thing option:selected").text();
+    var json = { "@context": "http://www.schema.org",  "@type": selected };
+    $("#json-ld-col").text(JSON.stringify(json, undefined, 4));
 
-    // Create JSON-LD on change
+    propertyChanges();
+});
+
+
+/*
+ * Create JSON-LD on change
+ */
+function propertyChanges() {
     $(".property").keyup(function(event) {
-	var selected = $("#sel-thing option:selected").text();
-	var jsonLDCol = $("#json-ld-col");
-	var jsonText = jsonLDCol.text().trim();
+	var jsonText =  $("#json-ld-col").text().trim();
 	var json = JSON.parse(jsonText);
 
-	if (jsonText == "{}") {
-	    json["@context"] = "http://www.schema.org";
-	    json["@type"] = selected;
-	}
-	
 	// Set property value in JSON
 	var property = $(this).attr('id');
 	if ($(this).val().length == 0) {
@@ -58,35 +88,4 @@ $("#sel-thing").change(function () {
 	// Render JSON
 	$("#json-ld-col").text(JSON.stringify(json, undefined, 4));
     });
-});
-
-
-
-/*
- *
- *
- * Loading schema.org objects from jsonld on webpage start
- *
- *
- */
-$.getJSON('./../src/schema/schema.json', {format: "json"}, function (json) {
-    /**
-       creating Schema from received json
-    **/
-    
-    Schema.addJSON(json);
-    //console.log(Schema);
-    /**
-       getting childrens from schema, childrens are subclases of schema
-    **/
-    //types = schema.getType("Event");
-    //console.log(types);
-    /**
-       creating list of options based on schema types
-    **/
-    //Form.createList(types);
-
-
-}).fail(function (jqxhr, textStatus, error) {
-    alert("unable to load jsonld!");
-});
+}
