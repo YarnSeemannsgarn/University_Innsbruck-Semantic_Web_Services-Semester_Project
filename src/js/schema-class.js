@@ -1,11 +1,6 @@
 /*
- *
- *
  * We will create schema class using extend function
- *
- *
  */
-
 function Schema()
 {
          

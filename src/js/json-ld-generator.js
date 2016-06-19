@@ -61,7 +61,7 @@ $("#sel-thing").change(function () {
     
     // Initial JSON-LD
     var selected = $("#sel-thing option:selected").text();
-    var json = { "@context": "http://www.schema.org",  "@type": selected };
+    var json = { "@context": "http://schema.org",  "@type": selected };
     $("#json-ld-col").text(JSON.stringify(json, undefined, 4));
 
     propertyChanges();
