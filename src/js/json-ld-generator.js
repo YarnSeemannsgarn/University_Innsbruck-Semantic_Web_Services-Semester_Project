@@ -48,28 +48,21 @@ $("#sel-thing").change(function () {
 	}
 	newRow = !newRow;
 	
-	// Define input field
-	var input = "<input type=\"text\" id=\"" + value + "\" class=\"property"
-	var dataTypes = schema.getPropertyDataTypes(value);
-	if ($.inArray("Date", dataTypes) != -1) {
-	    input += " datepicker";
-	}
-	input += "\">";
-
 	// Add input field
 	$(".properties-row").last().append(
 	    "<div class=\"col s6\">" +
 		"<label for=\"" + value + "\">" + 
 		capitalizeFirstLetter(value) + ":" + 
 		"</label>" +
-		input +
+		"<input type=\"text\" id=\"" + value + "\" class=\"property\">" +
 		"</div>");
 
-	// Add datehandler
+	// Add datehandler for dates
+	var dataTypes = schema.getPropertyDataTypes(value);
 	if ($.inArray("Date", dataTypes) != -1) {
 	    var property = $("#" + value);
-	    $('.datepicker').pickadate({
-		format: 'dd-mm-yyyy',
+	    property.pickadate({
+		format: 'yyyy-mm-dd', // ISO 8601 due to https://schema.org/Date
 		selectYears: true,
 		selectMonths: true,
 		onClose: function() { 
