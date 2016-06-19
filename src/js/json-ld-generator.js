@@ -16,7 +16,7 @@ $("#sel-thing").change(function () {
     var type = Schema.getType(choosen);
 
     // Visualize each property
-    $("#left-column").css("opacity", "0.0");
+    $("#properties-col").css("opacity", "0.0");
     var newRow = true;
     $.each(type.properties, function(key, value) {
 	if (newRow) {
