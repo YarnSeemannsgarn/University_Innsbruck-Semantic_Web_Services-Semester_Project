@@ -36,29 +36,40 @@ $("#sel-thing").change(function () {
     $(".properties-row").remove();
 
     // Load schema of selected Thing
-    var choosen = $("#sel-thing option:selected").text();
-    var type = schema.getType(choosen);
+    var selectedType = $(this).find(":selected").text();
+    var type = schema.getType(selectedType);
 
     // Visualize each property
     $("#properties-col").css("opacity", "0.0");
-    var newRow = true;
-    $.each(type.properties, function(key, value) {
-	if (newRow) {
-	    $("#properties-col").append("<div class=\"row properties-row\"></div>");
-	}
-	newRow = !newRow;
-	
-	// Add input field
-	$(".properties-row").last().append(
-	    "<div class=\"col s6\">" +
-		"<label for=\"" + value + "\">" + 
-		capitalizeFirstLetter(value) + ":" + 
+    $.each(type.properties, function(index, value) {
+	// Construct html
+	var capitalzedProperty = capitalizeFirstLetter(value);
+	var html = "<div class=\"row properties-row input-field\">"
+	var dataTypes = schema.getPropertyDataTypes(value);
+	if (dataTypes.length > 1) {
+	    html += "<div id=\"1 " + value + "\">" +
+		"<select class=\"sel-datatype\">" +
+		"<option disabled selected>Choose datatype for " + capitalzedProperty + "</option>";
+	    $.each(dataTypes, function(indexDatatype, valueDatatype) {
+		html += "<option>" + valueDatatype + "</option>";
+	    });
+	    html += "</select>" +
+		"<label>" + 
+		capitalzedProperty + ":" +
 		"</label>" +
-		"<input type=\"text\" id=\"" + value + "\" class=\"property\">" +
-		"</div>");
+		"</div>";
+	} else {
+	    html += "<input type=\"text\" id=\"" + value + "\" class=\"property\">" +
+		"<label for=\"" + value + "\">" + 
+		capitalzedProperty + ":" + 
+		"</label>";
+	}
+	html += "</div>";
+	
+	// Add html
+	$("#properties-col").append(html);
 
 	// Add datehandler for dates
-	var dataTypes = schema.getPropertyDataTypes(value);
 	if (($.inArray("Date", dataTypes) !== -1) ||
 	    ($.inArray("DateTime", dataTypes) !== -1)) {
 	    var property = $("#" + value);
@@ -72,11 +83,61 @@ $("#sel-thing").change(function () {
 	    });	 
 	};   
     });
+
+    $('select').material_select();
     $("#properties-col").animate({opacity: 1.0}, 1000);
-    
+   
+    $(".sel-datatype").change(function () {
+	var parentID = $(this).parent().attr("id");
+	// Do not consider select wrapper
+	if (parentID !== undefined) {
+	    var div = $(this);
+	    var selected = $(this).find(":selected").text()
+	    var typeInside = schema.getType(selected);
+	    var splittedID = parentID.split(" ");
+	    var indent = parseInt(splittedID[0]);
+	    // var html = "<div class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\">";
+	    var col = "<div id=\"test\" class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
+	    div.append(col);
+
+	    var select_html = "";
+	    var input_html = "";
+	    $.each(typeInside.properties, function(index, value) {
+		// Construct html
+		var capitalzedProperty = capitalizeFirstLetter(value);
+		var dataTypes = schema.getPropertyDataTypes(value);
+		if (dataTypes.length > 1) {
+		    select_html += "<div class=\"row properties-row input-field\">";
+		    select_html += "<div id=\"" + value + "x\">" +
+			"<select class=\"sel-datatype\">" +
+			"<option disabled selected>Choose datatype for " + capitalzedProperty + "</option>";
+		    $.each(dataTypes, function(indexDatatype, valueDatatype) {
+			select_html += "<option>" + valueDatatype + "</option>";
+		    });
+		    select_html += "</select>" +
+			"<label>" + 
+			capitalzedProperty + ":" +
+			"</label>" +
+			"</div>";
+		    select_html += "</div>";
+		} else {
+		    input_html += "<div class=\"row properties-row input-field\">";
+		    input_html += "<input type=\"text\" id=\"" + value + "x\" class=\"property\">" +
+			"<label for=\"" + value + "x\">" + 
+			capitalzedProperty + ":" + 
+			"</label>";
+		    input_html += "</div>";
+		}
+	    });
+	    $("#test").append(select_html);
+	    $('select').material_select();
+	    $("#test").append(input_html);
+	}
+
+    });
+
     // Initial JSON-LD
-    var selected = $("#sel-thing option:selected").text();
-    var json = { "@context": "http://schema.org",  "@type": selected };
+    var json = { "@context": "http://schema.org",  "@type": selectedType };
     $("#json-ld-col").text(JSON.stringify(json, undefined, 4));
 
     $(".property").keyup(function(event) {
