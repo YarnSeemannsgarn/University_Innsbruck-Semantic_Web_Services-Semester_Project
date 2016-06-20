@@ -78,7 +78,7 @@ $("#sel-thing").change(function () {
 		selectYears: true,
 		selectMonths: true,
 		onClose: function() { 
-		    propertyChanges(property);
+		    propertyChanges(property.attr('id'), property.val());
 		}
 	    });	 
 	};   
@@ -92,15 +92,15 @@ $("#sel-thing").change(function () {
     $("#json-ld-col").text(JSON.stringify(json, undefined, 4));
 
     $(".property").keyup(function(event) {
-	propertyChanges($(this));
+	propertyChanges($(this).attr('id'), $(this).val());
     });
 
     $(".sel-datatype").change(function () {
-	var parentID = $(this).parent().attr("id");
 	// Do not consider select wrapper
-	if (parentID !== undefined) {
-	    var div = $(this);
-	    var selected = $(this).find(":selected").text();
+	if ($(this).hasClass("initialized")) {
+	    var parentID = $(this).parent().parent().attr("id");
+	    var div = $(this).parent();
+	    var selected = $(this).parent().find(":selected").text();
 	    var typeInside = schema.getType(selected);
 	    var splittedID = parentID.split(" ");
 	    var indent = parseInt(splittedID[0]);
@@ -141,7 +141,7 @@ $("#sel-thing").change(function () {
 	    $('select').material_select();
 	    $("#test").append(input_html);
 
-	    propertyChanges(div, true, capitalizeFirstLetter(property), selected);
+	    propertyChanges(capitalizeFirstLetter(property), selected, true);
 	}
 	
     });
@@ -151,21 +151,19 @@ $("#sel-thing").change(function () {
 /*
  * Create JSON-LD on change
  */
-function propertyChanges(elem, selectChange=false, test="", test2="") {
+function propertyChanges(property, value, selectChange=false) {
     var jsonText =  $("#json-ld-col").text().trim();
     var json = JSON.parse(jsonText);
 
     // Set property value in JSON
     if (selectChange === false) {
-	var property = elem.attr('id');
-	if (elem.val().length == 0) {
+	if (value.length == 0) {
 	    delete json[property];
 	} else {
-	    var text = elem.val();
-	    json[property] = text;
+	    json[property] = value;
 	}
     } else {
-	json[test] = { "@type": test2 };
+	json[property] = { "@type": value };
     }
     
     // Render JSON
