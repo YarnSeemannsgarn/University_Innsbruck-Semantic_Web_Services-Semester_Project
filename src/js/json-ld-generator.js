@@ -47,7 +47,7 @@ $("#sel-thing").change(function () {
 	var html = "<div class=\"row properties-row input-field\">"
 	var dataTypes = schema.getPropertyDataTypes(value);
 	if (dataTypes.length > 1) {
-	    html += "<div id=\"1 " + value + "\">" +
+	    html += "<div id=\"1-" + value + "\">" +
 		"<select class=\"sel-datatype\">" +
 		"<option disabled selected>Choose datatype for " + capitalzedProperty + "</option>";
 	    $.each(dataTypes, function(indexDatatype, valueDatatype) {
@@ -102,10 +102,12 @@ $("#sel-thing").change(function () {
 	    var div = $(this).parent();
 	    var selected = $(this).parent().find(":selected").text();
 	    var typeInside = schema.getType(selected);
-	    var splittedID = parentID.split(" ");
+	    var splittedID = parentID.split("-");
 	    var indent = parseInt(splittedID[0]);
-	    var property = splittedID.slice(1).join(" ");
-	    var col = "<div id=\"test\" class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
+	    var property = splittedID.slice(1).join("-");
+	    var colID = "col" + "-" + (indent+1) + "-" + property;
+	    console.log(colID);
+	    var col = "<div id=\"" + colID + "\"" + "class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
 	    div.append(col);
 
 	    var select_html = "";
@@ -137,16 +139,16 @@ $("#sel-thing").change(function () {
 		    input_html += "</div>";
 		}
 	    });
-	    $("#test").append(select_html);
+	    // First materialize selects, otherwise there is a ui problem
+	    $("#" + colID).append(select_html);
 	    $('select').material_select();
-	    $("#test").append(input_html);
+	    $("#" + colID).append(input_html);
 
 	    propertyChanges(capitalizeFirstLetter(property), selected, true);
 	}
 	
     });
 });
-
 
 /*
  * Create JSON-LD on change
