@@ -121,7 +121,7 @@ $("#sel-thing").change(function () {
 		var dataTypes = schema.getPropertyDataTypes(value);
 		if (dataTypes.length > 1) {
 		    select_html += "<div class=\"row properties-row input-field\">";
-		    select_html += "<div id=\"" + value + "x\">" +
+		    select_html += "<div id=\"" + property + "-" + value + "\">" +
 			"<select class=\"sel-datatype\">" +
 			"<option disabled selected>Choose datatype for " + capitalzedProperty + "</option>";
 		    $.each(dataTypes, function(indexDatatype, valueDatatype) {
@@ -135,8 +135,8 @@ $("#sel-thing").change(function () {
 		    select_html += "</div>";
 		} else {
 		    input_html += "<div class=\"row properties-row input-field\">";
-		    input_html += "<input type=\"text\" id=\"" + value + "x\" class=\"property\">" +
-			"<label for=\"" + value + "x\">" + 
+		    input_html += "<input type=\"text\" id=\"" + property + "-" + value + "\" class=\"property\">" +
+			"<label for=\"" + property + "-" + value + "\">" + 
 			capitalzedProperty + ":" + 
 			"</label>";
 		    input_html += "</div>";
@@ -149,8 +149,10 @@ $("#sel-thing").change(function () {
 	    $("#" + colID).css("opacity", "0.0");
 	    $("#" + colID).animate({opacity: 1.0}, 1000);
 
-
 	    propertyChanges(capitalizeFirstLetter(property), selected, true);
+	    $(".property").keyup(function(event) {
+		propertyChanges($(this).attr('id'), $(this).val());
+	    });
 	}
 	
     });
@@ -162,13 +164,33 @@ $("#sel-thing").change(function () {
 function propertyChanges(property, value, selectChange=false) {
     var jsonText =  $("#json-ld-col").text().trim();
     var json = JSON.parse(jsonText);
+    var propertyArray = property.split("-");
 
     // Set property value in JSON
     if (selectChange === false) {
 	if (value.length == 0) {
-	    delete json[property];
+	    if (propertyArray.length === 1) {
+		delete json[property];
+	    } else {
+		// Eval workaround to access json on specified position
+		jsonAccess = "delete json";
+		$.each(propertyArray, function(index, val) {
+		    jsonAccess += "[\"" + capitalizeFirstLetter(val)  + "\"]";
+		});
+		eval(jsonAccess);
+	    }
 	} else {
-	    json[property] = value;
+	    if (propertyArray.length === 1) {
+		json[property] = value;
+	    } else {
+		// Eval workaround to access json on specified position
+		jsonAccess = "json";
+		$.each(propertyArray, function(index, val) {
+		    jsonAccess += "[\"" + capitalizeFirstLetter(val)  + "\"]";
+		});
+		jsonAccess += " = value";
+		eval(jsonAccess);
+	    }
 	}
     } else {
 	json[property] = { "@type": value };
