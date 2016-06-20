@@ -86,17 +86,25 @@ $("#sel-thing").change(function () {
 
     $('select').material_select();
     $("#properties-col").animate({opacity: 1.0}, 1000);
-   
+
+    // Initial JSON-LD
+    var json = { "@context": "http://schema.org",  "@type": selectedType };
+    $("#json-ld-col").text(JSON.stringify(json, undefined, 4));
+
+    $(".property").keyup(function(event) {
+	propertyChanges($(this));
+    });
+
     $(".sel-datatype").change(function () {
 	var parentID = $(this).parent().attr("id");
 	// Do not consider select wrapper
 	if (parentID !== undefined) {
 	    var div = $(this);
-	    var selected = $(this).find(":selected").text()
+	    var selected = $(this).find(":selected").text();
 	    var typeInside = schema.getType(selected);
 	    var splittedID = parentID.split(" ");
 	    var indent = parseInt(splittedID[0]);
-	    // var html = "<div class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\">";
+	    var property = splittedID.slice(1).join(" ");
 	    var col = "<div id=\"test\" class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
 	    div.append(col);
 
@@ -132,16 +140,10 @@ $("#sel-thing").change(function () {
 	    $("#test").append(select_html);
 	    $('select').material_select();
 	    $("#test").append(input_html);
+
+	    propertyChanges(div, true, capitalizeFirstLetter(property), selected);
 	}
-
-    });
-
-    // Initial JSON-LD
-    var json = { "@context": "http://schema.org",  "@type": selectedType };
-    $("#json-ld-col").text(JSON.stringify(json, undefined, 4));
-
-    $(".property").keyup(function(event) {
-	propertyChanges($(this));
+	
     });
 });
 
@@ -149,17 +151,21 @@ $("#sel-thing").change(function () {
 /*
  * Create JSON-LD on change
  */
-function propertyChanges(elem) {
+function propertyChanges(elem, selectChange=false, test="", test2="") {
     var jsonText =  $("#json-ld-col").text().trim();
     var json = JSON.parse(jsonText);
 
     // Set property value in JSON
-    var property = elem.attr('id');
-    if (elem.val().length == 0) {
-	delete json[property];
+    if (selectChange === false) {
+	var property = elem.attr('id');
+	if (elem.val().length == 0) {
+	    delete json[property];
+	} else {
+	    var text = elem.val();
+	    json[property] = text;
+	}
     } else {
-	var text = elem.val();
-	json[property] = text;
+	json[test] = { "@type": test2 };
     }
     
     // Render JSON
