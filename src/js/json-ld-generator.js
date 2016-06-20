@@ -105,7 +105,8 @@ $("#sel-thing").change(function () {
 function selectionChanged() {
     $(".sel-datatype").change(function () {
 	// Do not consider select wrapper
-	if ($(this).hasClass("initialized")) {
+	if ($(this).hasClass("initialized") && !$(this).hasClass("select-wrapper")) {
+	    console.log($(this));
 	    var parentID = $(this).parent().parent().attr("id");
 	    var splittedID = parentID.split("-");
 	    var indent = parseInt(splittedID[0]);
@@ -134,8 +135,27 @@ function selectionChanged() {
 		$("#" + colID).css("opacity", "0.0");
 		$("#" + colID).animate({opacity: 1.0}, 1000);
 
+		propertyChanges(property, "");
 		$(".property").keyup(function(event) {
 		    propertyChanges(property, $(this).val());
+		});
+	    } else if (selected === "Boolean") {
+		var rowID = (indent+1) + "-" + property;
+		var checkID = (indent+1) + "-check-" + property;
+		input_html = "<div class=\"row properties-row input-field\">" +
+		    "<form action=\"#\">" +
+		    "<input type=\"checkbox\" id=\"" + checkID + "\" />" +
+		    "<label for=\"" + checkID + "\">" + property + "</label>" +
+		    "</form>" +
+		    "</div>";
+
+		$("#" + colID).append(input_html);
+		$("#" + colID).css("opacity", "0.0");
+		$("#" + colID).animate({opacity: 1.0}, 1000);
+
+		propertyChanges(property, "false");
+		$("#" + checkID).change(function() {
+		    propertyChanges(property, $(this).is(':checked').toString());
 		});
 	    } else {
 		var typeInside = schema.getType(selected);
