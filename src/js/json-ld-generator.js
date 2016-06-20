@@ -143,10 +143,8 @@ function selectionChanged() {
 		var rowID = (indent+1) + "-" + property;
 		var checkID = (indent+1) + "-check-" + property;
 		input_html = "<div class=\"row properties-row input-field\">" +
-		    "<form action=\"#\">" +
 		    "<input type=\"checkbox\" id=\"" + checkID + "\" />" +
 		    "<label for=\"" + checkID + "\">" + property + "</label>" +
-		    "</form>" +
 		    "</div>";
 
 		$("#" + colID).append(input_html);
