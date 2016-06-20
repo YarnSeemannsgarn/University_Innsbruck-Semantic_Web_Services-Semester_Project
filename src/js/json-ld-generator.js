@@ -40,7 +40,6 @@ $("#sel-thing").change(function () {
     var type = schema.getType(selectedType);
 
     // Visualize each property
-    $("#properties-col").css("opacity", "0.0");
     $.each(type.properties, function(index, value) {
 	// Construct html
 	var capitalzedProperty = capitalizeFirstLetter(value);
@@ -85,6 +84,7 @@ $("#sel-thing").change(function () {
     });
 
     $('select').material_select();
+    $("#properties-col").css("opacity", "0.0");
     $("#properties-col").animate({opacity: 1.0}, 1000);
 
     // Initial JSON-LD
@@ -95,6 +95,8 @@ $("#sel-thing").change(function () {
 	propertyChanges($(this).attr('id'), $(this).val());
     });
 
+    // For complexer substructures
+    // TODO: recursive call
     $(".sel-datatype").change(function () {
 	// Do not consider select wrapper
 	if ($(this).hasClass("initialized")) {
@@ -106,7 +108,8 @@ $("#sel-thing").change(function () {
 	    var indent = parseInt(splittedID[0]);
 	    var property = splittedID.slice(1).join("-");
 	    var colID = "col" + "-" + (indent+1) + "-" + property;
-	    console.log(colID);
+	    
+	    $("#" + colID).remove();
 	    var col = "<div id=\"" + colID + "\"" + "class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
 	    div.append(col);
 
@@ -143,6 +146,9 @@ $("#sel-thing").change(function () {
 	    $("#" + colID).append(select_html);
 	    $('select').material_select();
 	    $("#" + colID).append(input_html);
+	    $("#" + colID).css("opacity", "0.0");
+	    $("#" + colID).animate({opacity: 1.0}, 1000);
+
 
 	    propertyChanges(capitalizeFirstLetter(property), selected, true);
 	}
