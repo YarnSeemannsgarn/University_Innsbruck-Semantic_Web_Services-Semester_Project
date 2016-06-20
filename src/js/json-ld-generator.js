@@ -96,7 +96,6 @@ $("#sel-thing").change(function () {
     });
 
     // For complexer substructures
-    // TODO: recursive call
     selectionChanged();
 });
 
@@ -108,61 +107,82 @@ function selectionChanged() {
 	// Do not consider select wrapper
 	if ($(this).hasClass("initialized")) {
 	    var parentID = $(this).parent().parent().attr("id");
-	    var div = $(this).parent();
-	    var selected = $(this).parent().find(":selected").text();
-	    var typeInside = schema.getType(selected);
 	    var splittedID = parentID.split("-");
 	    var indent = parseInt(splittedID[0]);
 	    var property = splittedID.slice(1).join("-");
-	    var colID = "col" + "-" + (indent+1) + "-" + property;
 	    
+	    // Construct column
+	    var colID = "col" + "-" + (indent+1) + "-" + property;
 	    $("#" + colID).remove();
 	    var col = "<div id=\"" + colID + "\"" + "class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
+
+	    // Append column to div as new substructure
+	    var div = $(this).parent();
 	    div.append(col);
 
-	    var select_html = "";
-	    var input_html = "";
-	    $.each(typeInside.properties, function(index, value) {
-		// Construct html
-		var capitalzedProperty = capitalizeFirstLetter(value);
-		var dataTypes = schema.getPropertyDataTypes(value);
-		var rowID = (indent+1) + "-" + property + "-" + value;
-		if (dataTypes.length > 1) {
-		    select_html += "<div class=\"row properties-row input-field\">";
-		    select_html += "<div id=\"" + rowID + "\">" +
-			"<select class=\"sel-datatype\">" +
-			"<option disabled selected>Choose datatype for " + capitalzedProperty + "</option>";
-		    $.each(dataTypes, function(indexDatatype, valueDatatype) {
-			select_html += "<option>" + valueDatatype + "</option>";
-		    });
-		    select_html += "</select>" +
-			"<label>" + 
-			capitalzedProperty + ":" +
-			"</label>" +
-			"</div>";
-		    select_html += "</div>";
-		} else {
-		    input_html += "<div class=\"row properties-row input-field\">";
-		    input_html += "<input type=\"text\" id=\""  + rowID + "\" class=\"property\">" +
-			"<label for=\"" + property + "-" + value + "\">" + 
-			capitalzedProperty + ":" + 
-			"</label>";
-		    input_html += "</div>";
-		}
-	    });
-	    // First materialize selects, otherwise there is a ui problem
-	    $("#" + colID).append(select_html);
-	    $('select').material_select();
-	    $("#" + colID).append(input_html);
-	    $("#" + colID).css("opacity", "0.0");
-	    $("#" + colID).animate({opacity: 1.0}, 1000);
+	    var selected = $(this).parent().find(":selected").text();
+	    if (selected === "Text" || selected === "URL" ) {
+		var rowID = (indent+1) + "-" + property;
+		input_html = "<div class=\"row properties-row input-field\">" +
+		    "<input type=\"text\" id=\""  + rowID + "\" class=\"property\">" +
+		    "<label for=\"" + rowID + "\">" + 
+		    capitalizeFirstLetter(property) + ":" + 
+		    "</label>" + 
+		    "</div>";
 
-	    propertyChanges(capitalizeFirstLetter(property), selected, true);
-	    $(".property").keyup(function(event) {
-		propertyChanges($(this).attr('id'), $(this).val());
-	    });
+		$("#" + colID).append(input_html);
+		$("#" + colID).css("opacity", "0.0");
+		$("#" + colID).animate({opacity: 1.0}, 1000);
 
-	    selectionChanged();
+		$(".property").keyup(function(event) {
+		    propertyChanges(property, $(this).val());
+		});
+	    } else {
+		var typeInside = schema.getType(selected);
+		var select_html = "";
+		var input_html = "";
+		$.each(typeInside.properties, function(index, value) {
+		    // Construct html
+		    var capitalzedProperty = capitalizeFirstLetter(value);
+		    var dataTypes = schema.getPropertyDataTypes(value);
+		    var rowID = (indent+1) + "-" + property + "-" + value;
+		    if (dataTypes.length > 1) {
+			select_html += "<div class=\"row properties-row input-field\">";
+			select_html += "<div id=\"" + rowID + "\">" +
+			    "<select class=\"sel-datatype\">" +
+			    "<option disabled selected>Choose datatype for " + capitalzedProperty + "</option>";
+			$.each(dataTypes, function(indexDatatype, valueDatatype) {
+			    select_html += "<option>" + valueDatatype + "</option>";
+			});
+			select_html += "</select>" +
+			    "<label>" + 
+			    capitalzedProperty + ":" +
+			    "</label>" +
+			    "</div>";
+			select_html += "</div>";
+		    } else {
+			input_html += "<div class=\"row properties-row input-field\">";
+			input_html += "<input type=\"text\" id=\""  + rowID + "\" class=\"property\">" +
+			    "<label for=\"" + rowID + "\">" + 
+			    capitalzedProperty + ":" + 
+			    "</label>";
+			input_html += "</div>";
+		    }
+		});
+		// First materialize selects, otherwise there is a ui problem
+		$("#" + colID).append(select_html);
+		$('select').material_select();
+		$("#" + colID).append(input_html);
+		$("#" + colID).css("opacity", "0.0");
+		$("#" + colID).animate({opacity: 1.0}, 1000);
+
+		propertyChanges(capitalizeFirstLetter(property), selected, true);
+		$(".property").keyup(function(event) {
+		    propertyChanges($(this).attr('id'), $(this).val());
+		});
+
+		selectionChanged();
+	    }
 	}	
     });
 }
@@ -171,6 +191,8 @@ function selectionChanged() {
  * Create JSON-LD on change
  */
 function propertyChanges(property, value, selectChange=false) {
+    console.log(property);
+    console.log(value);
     var jsonText =  $("#json-ld-col").text().trim();
     var json = JSON.parse(jsonText);
     var propertyArray = property.split("-");
