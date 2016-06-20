@@ -97,6 +97,13 @@ $("#sel-thing").change(function () {
 
     // For complexer substructures
     // TODO: recursive call
+    selectionChanged();
+});
+
+/*
+ * Inner selection changed (recursive!)
+ */
+function selectionChanged() {
     $(".sel-datatype").change(function () {
 	// Do not consider select wrapper
 	if ($(this).hasClass("initialized")) {
@@ -119,9 +126,10 @@ $("#sel-thing").change(function () {
 		// Construct html
 		var capitalzedProperty = capitalizeFirstLetter(value);
 		var dataTypes = schema.getPropertyDataTypes(value);
+		var rowID = (indent+1) + "-" + property + "-" + value;
 		if (dataTypes.length > 1) {
 		    select_html += "<div class=\"row properties-row input-field\">";
-		    select_html += "<div id=\"" + property + "-" + value + "\">" +
+		    select_html += "<div id=\"" + rowID + "\">" +
 			"<select class=\"sel-datatype\">" +
 			"<option disabled selected>Choose datatype for " + capitalzedProperty + "</option>";
 		    $.each(dataTypes, function(indexDatatype, valueDatatype) {
@@ -135,7 +143,7 @@ $("#sel-thing").change(function () {
 		    select_html += "</div>";
 		} else {
 		    input_html += "<div class=\"row properties-row input-field\">";
-		    input_html += "<input type=\"text\" id=\"" + property + "-" + value + "\" class=\"property\">" +
+		    input_html += "<input type=\"text\" id=\""  + rowID + "\" class=\"property\">" +
 			"<label for=\"" + property + "-" + value + "\">" + 
 			capitalzedProperty + ":" + 
 			"</label>";
@@ -153,10 +161,11 @@ $("#sel-thing").change(function () {
 	    $(".property").keyup(function(event) {
 		propertyChanges($(this).attr('id'), $(this).val());
 	    });
-	}
-	
+
+	    selectionChanged();
+	}	
     });
-});
+}
 
 /*
  * Create JSON-LD on change
@@ -193,7 +202,17 @@ function propertyChanges(property, value, selectChange=false) {
 	    }
 	}
     } else {
-	json[property] = { "@type": value };
+	if (value.length == 0) {
+	    json[property] = { "@type": value };
+	} else {
+	    // Eval workaround to access json on specified position
+	    jsonAccess = "json";
+	    $.each(propertyArray, function(index, val) {
+		jsonAccess += "[\"" + capitalizeFirstLetter(val)  + "\"]";
+	    });
+	    jsonAccess += " = { \"@type\": value }";
+	    eval(jsonAccess);
+	}
     }
     
     // Render JSON
