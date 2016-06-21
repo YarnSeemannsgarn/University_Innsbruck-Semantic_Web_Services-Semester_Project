@@ -37,7 +37,6 @@ $("#sel-thing").change(function () {
     // Visualize each property
     $.each(type.properties, function(index, value) {
 	// Construct html
-	var capitalzedProperty = capitalizeFirstLetter(value);
 	var rowID = "1-" + value;
 	var html = "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">"
 	var dataTypes = SCHEMA.getPropertyDataTypes(value);
@@ -51,7 +50,7 @@ $("#sel-thing").change(function () {
 	    });
 	    html += "</select>" +
 		"<label>" + 
-		capitalzedProperty + ":" +
+		value + ":" +
 		"</label>";
 
 	// Construct input text field
@@ -59,7 +58,7 @@ $("#sel-thing").change(function () {
 	    var inputID = "input-" + rowID;
 	    html += "<input type=\"text\" id=\"" + inputID + "\">" +
 		"<label for=\"" + inputID + "\">" + 
-		capitalzedProperty + ":" + 
+		value + ":" + 
 		"</label>";
 	    textIDs.push(inputID);
 
@@ -67,7 +66,7 @@ $("#sel-thing").change(function () {
 	} else {
 	    var checkID = "check-" + rowID;
 	    html += "<input type=\"checkbox\" id=\"" + checkID + "\" class=\"sel-datatype\"/>" +
-		"<label for=\"" + checkID + "\">" + capitalzedProperty + "</label>";
+		"<label for=\"" + checkID + "\">" + value + "</label>";
 	}
 	html += "</div>";
 	
@@ -144,7 +143,7 @@ function selectionChanged() {
 		    input_html = "<div id=\""+ rowID + "\" class=\"row properties-row input-field\">" +
 			"<input type=\"text\" id=\"" + inputID + "\">" +
 			"<label for=\"" + inputID + "\">" + 
-			capitalizeFirstLetter(property) + ":" + 
+			property + ":" + 
 			"</label>" + 
 			"</div>";
 
@@ -201,9 +200,9 @@ function selectionChanged() {
 		    $("#" + colID).animate({opacity: 1.0}, 1000);
 
 		    if (isCheckBox && checkboxPropertyType !== "") {
-			updateJSON(capitalizeFirstLetter(property), checkboxPropertyType, true);
+			updateJSON(property, checkboxPropertyType, true);
 		    } else {
-			updateJSON(capitalizeFirstLetter(property), type, true);
+			updateJSON(property, type, true);
 		    }
 		    $.each(changeIDs, function(index, value) {
 			$("#" + value).keyup(function(event) {
@@ -229,8 +228,6 @@ function constructRowHTML(parentRow, property, htmls, changeIDs) {
 
     var dataTypes = SCHEMA.getPropertyDataTypes(property);
     var properties = parentProperties + "-" + property;
-
-    var capitalizedProperties = capitalizeFirstLetter(properties);
     var rowID = (indent+1) + "-" + properties;
     if (dataTypes.length > 1) {
 	htmls["select_html"] += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
@@ -241,7 +238,7 @@ function constructRowHTML(parentRow, property, htmls, changeIDs) {
 	});
 	htmls["select_html"] += "</select>" +
 	    "<label>" + 
-	    capitalizedProperties + ":" +
+	    properties + ":" +
 	    "</label>";
 	htmls["select_html"] += "</div>";
     } else if($.inArray(dataTypes[0], TEXT_DATA_TYPES) !== -1) {
@@ -249,7 +246,7 @@ function constructRowHTML(parentRow, property, htmls, changeIDs) {
 	htmls["input_html"] += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
 	htmls["input_html"] += "<input type=\"text\" id=\"" + inputID + "\">" +
 	    "<label for=\"" + inputID + "\">" + 
-	    capitalizedProperties + ":" + 
+	    properties + ":" + 
 	    "</label>";
 	htmls["input_html"] += "</div>";
 	changeIDs.push(inputID);
@@ -257,13 +254,13 @@ function constructRowHTML(parentRow, property, htmls, changeIDs) {
 	var checkID = "check-" + rowID;
 	htmls["input_html"] += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
 	htmls["input_html"] += "<input type=\"checkbox\" id=\"" + checkID + "\" class=\"sel-datatype\"/>" +
-	    "<label for=\"" + checkID + "\">" + capitalizedProperties + "</label>";
+	    "<label for=\"" + checkID + "\">" + properties + "</label>";
 	htmls["input_html"] += "</div>";
     }
 }
 
 /*
- * Create JSON-LD on change
+ * Update JSON-LD on change
  */
 function updateJSON(property, value, selectChange=false) {
     console.log(property);
@@ -276,23 +273,23 @@ function updateJSON(property, value, selectChange=false) {
     if (selectChange === false) {
 	if (value.length == 0) {
 	    if (propertyArray.length === 1) {
-		delete json[capitalizeFirstLetter(property)];
+		delete json[property];
 	    } else {
 		// Eval workaround to access json on specified position
 		jsonAccess = "delete json";
 		$.each(propertyArray, function(index, val) {
-		    jsonAccess += "[\"" + capitalizeFirstLetter(val)  + "\"]";
+		    jsonAccess += "[\"" + val  + "\"]";
 		});
 		eval(jsonAccess);
 	    }
 	} else {
 	    if (propertyArray.length === 1) {
-		json[capitalizeFirstLetter(property)] = value;
+		json[property] = value;
 	    } else {
 		// Eval workaround to access json on specified position
 		jsonAccess = "json";
 		$.each(propertyArray, function(index, val) {
-		    jsonAccess += "[\"" + capitalizeFirstLetter(val)  + "\"]";
+		    jsonAccess += "[\"" + val  + "\"]";
 		});
 		jsonAccess += " = value";
 		eval(jsonAccess);
@@ -300,12 +297,12 @@ function updateJSON(property, value, selectChange=false) {
 	}
     } else {
 	if (value.length == 0) {
-	    json[capitalizeFirstLetter(property)] = { "@type": value };
+	    json[property] = { "@type": value };
 	} else {
 	    // Eval workaround to access json on specified position
 	    jsonAccess = "json";
 	    $.each(propertyArray, function(index, val) {
-		jsonAccess += "[\"" + capitalizeFirstLetter(val)  + "\"]";
+		jsonAccess += "[\"" + val  + "\"]";
 	    });
 	    jsonAccess += " = { \"@type\": value }";
 	    eval(jsonAccess);
