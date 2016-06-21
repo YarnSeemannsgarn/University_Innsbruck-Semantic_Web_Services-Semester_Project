@@ -33,7 +33,6 @@ $("#sel-thing").change(function () {
 
     // Ids for handlers
     var textIDs = [];
-    var checkIDs = [];
 
     // Visualize each property
     $.each(type.properties, function(index, value) {
@@ -69,7 +68,6 @@ $("#sel-thing").change(function () {
 	    var checkID = "check-" + rowID;
 	    html += "<input type=\"checkbox\" id=\"" + checkID + "\" class=\"sel-datatype\"/>" +
 		"<label for=\"" + checkID + "\">" + capitalzedProperty + "</label>";
-	    checkIDs.push(checkID);
 	}
 	html += "</div>";
 	
@@ -106,13 +104,6 @@ $("#sel-thing").change(function () {
 	});
     });
 
-    /* $.each(checkIDs, function(index, value) {
-	$("#" + value).change(function(event) {
-	    var parentRow = $(this).closest(".properties-row");
-	    propertyChanges(parentRow.attr('id').split("-").slice(1).join("-"), $(this).val());
-	});
-    }); */
-
     // For complexer substructures
     selectionChanged();
 });
@@ -121,6 +112,7 @@ $("#sel-thing").change(function () {
  * Inner selection changed (recursive!)
  */
 function selectionChanged() {
+    $(".sel-datatype").unbind("change");
     $(".sel-datatype").change(function () {
 	var isCheckBox = ($(this).attr("type") === "checkbox");
 
