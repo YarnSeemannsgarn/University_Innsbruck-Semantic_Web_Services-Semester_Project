@@ -183,52 +183,19 @@ function selectionChanged() {
 
 		    // TODO: Handle if undefined
 		    if (typeInside === undefined) {
-			var test = SCHEMA.getPropertyDataTypes(splittedID[splittedID.length - 1]);
+			var dataTypes = SCHEMA.getPropertyDataTypes(splittedID[splittedID.length - 1]);
 		    }
 
-		    var select_html = "";
-		    var input_html = "";
+		    var htmls = { "select_html": "", "input_html": ""};
 		    var changeIDs = [];
 		    $.each(typeInside.properties, function(index, value) {
-			// Construct html
-			var newProperty = property + "-" + value
-			var capitalzedProperty = capitalizeFirstLetter(newProperty);
-			var dataTypes = SCHEMA.getPropertyDataTypes(value);
-			var rowID = (indent+1) + "-" + newProperty;
-			if (dataTypes.length > 1) {
-			    select_html += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
-			    select_html += "<select class=\"sel-datatype\">" +
-				"<option disabled selected>Choose datatype</option>";
-			    $.each(dataTypes, function(indexDatatype, valueDatatype) {
-				select_html += "<option>" + valueDatatype + "</option>";
-			    });
-			    select_html += "</select>" +
-				"<label>" + 
-				capitalzedProperty + ":" +
-				"</label>";
-			    select_html += "</div>";
-			} else if($.inArray(dataTypes[0], TEXT_DATA_TYPES) !== -1) {
-			    var inputID = "input-" + rowID;
-			    input_html += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
-			    input_html += "<input type=\"text\" id=\"" + inputID + "\">" +
-				"<label for=\"" + inputID + "\">" + 
-				capitalzedProperty + ":" + 
-				"</label>";
-			    input_html += "</div>";
-			    changeIDs.push(inputID);
-			} else {
-			    var checkID = "check-" + rowID;
-			    input_html += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
-			    input_html += "<input type=\"checkbox\" id=\"" + checkID + "\" class=\"sel-datatype\"/>" +
-				"<label for=\"" + checkID + "\">" + capitalzedProperty + "</label>";
-			    input_html += "</div>";
-			}
+			constructRowHTML(parentRow, value, htmls, changeIDs);
 		    });
 
 		    // First materialize selects, otherwise there is a ui problem
-		    $("#" + colID).append(select_html);
+		    $("#" + colID).append(htmls["select_html"]);
 		    $('select').material_select();
-		    $("#" + colID).append(input_html);
+		    $("#" + colID).append(htmls["input_html"]);
 		    $("#" + colID).css("opacity", "0.0");
 		    $("#" + colID).animate({opacity: 1.0}, 1000);
 
@@ -250,6 +217,47 @@ function selectionChanged() {
 	    }
 	}	
     });
+}
+
+function constructRowHTML(parentRow, property, htmls, changeIDs) {
+    // Construct html
+    var parentID = parentRow.attr("id");
+    var splittedID = parentID.split("-");
+    var indent = parseInt(splittedID[0]);
+    var parentProperties = splittedID.slice(1).join("-");
+    var properties = parentProperties + "-" + property
+    var capitalizedProperties = capitalizeFirstLetter(properties);
+    var dataTypes = SCHEMA.getPropertyDataTypes(property);
+    
+    var rowID = (indent+1) + "-" + properties;
+    if (dataTypes.length > 1) {
+	htmls["select_html"] += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
+	htmls["select_html"] += "<select class=\"sel-datatype\">" +
+	    "<option disabled selected>Choose datatype</option>";
+	$.each(dataTypes, function(indexDatatype, valueDatatype) {
+	    htmls["select_html"] += "<option>" + valueDatatype + "</option>";
+	});
+	htmls["select_html"] += "</select>" +
+	    "<label>" + 
+	    capitalizedProperties + ":" +
+	    "</label>";
+	htmls["select_html"] += "</div>";
+    } else if($.inArray(dataTypes[0], TEXT_DATA_TYPES) !== -1) {
+	var inputID = "input-" + rowID;
+	htmls["input_html"] += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
+	htmls["input_html"] += "<input type=\"text\" id=\"" + inputID + "\">" +
+	    "<label for=\"" + inputID + "\">" + 
+	    capitalizedProperties + ":" + 
+	    "</label>";
+	htmls["input_html"] += "</div>";
+	changeIDs.push(inputID);
+    } else {
+	var checkID = "check-" + rowID;
+	htmls["input_html"] += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
+	htmls["input_html"] += "<input type=\"checkbox\" id=\"" + checkID + "\" class=\"sel-datatype\"/>" +
+	    "<label for=\"" + checkID + "\">" + capitalizedProperties + "</label>";
+	htmls["input_html"] += "</div>";
+    }
 }
 
 /*
