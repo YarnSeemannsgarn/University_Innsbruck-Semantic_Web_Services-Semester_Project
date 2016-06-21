@@ -182,15 +182,16 @@ function selectionChanged() {
 		    typeInside = SCHEMA.getType(type);
 
 		    // TODO: Handle if undefined
-		    if (typeInside === undefined) {
-			var dataTypes = SCHEMA.getPropertyDataTypes(splittedID[splittedID.length - 1]);
-		    }
-
 		    var htmls = { "select_html": "", "input_html": ""};
 		    var changeIDs = [];
-		    $.each(typeInside.properties, function(index, value) {
-			constructRowHTML(parentRow, value, htmls, changeIDs);
-		    });
+		    if (typeInside !== undefined) {
+			$.each(typeInside.properties, function(index, value) {
+			    constructRowHTML(parentRow, value, htmls, changeIDs);
+			});
+		    } else {
+			constructRowHTML(parentRow, splittedID[splittedID.length - 1], htmls, changeIDs, true);
+		    }
+
 
 		    // First materialize selects, otherwise there is a ui problem
 		    $("#" + colID).append(htmls["select_html"]);
@@ -219,16 +220,21 @@ function selectionChanged() {
     });
 }
 
-function constructRowHTML(parentRow, property, htmls, changeIDs) {
+function constructRowHTML(parentRow, property, htmls, changeIDs, dataTypesAsNewProperty=false) {
     // Construct html
     var parentID = parentRow.attr("id");
     var splittedID = parentID.split("-");
     var indent = parseInt(splittedID[0]);
     var parentProperties = splittedID.slice(1).join("-");
-    var properties = parentProperties + "-" + property
-    var capitalizedProperties = capitalizeFirstLetter(properties);
+
     var dataTypes = SCHEMA.getPropertyDataTypes(property);
-    
+    var properties = "";
+    if (dataTypesAsNewProperty) {
+	properties = parentProperties + "-" + dataTypes[0];
+    } else {
+	properties = parentProperties + "-" + property;
+    }
+    var capitalizedProperties = capitalizeFirstLetter(properties);
     var rowID = (indent+1) + "-" + properties;
     if (dataTypes.length > 1) {
 	htmls["select_html"] += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
