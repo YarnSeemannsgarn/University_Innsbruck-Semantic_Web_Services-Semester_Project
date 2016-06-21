@@ -6,27 +6,19 @@ $(document).ready(function() {
 /*
  * Loading schema.org objects from jsonld on webpage start
  */
-var schema = new Schema();
+var SCHEMA = new Schema();
 $.getJSON('./../src/schema/schema.json', {format: "json"}, function (json) {
-    /**
-       creating Schema from received json
-    **/
-    
-    schema.addJSON(json);
-    //console.log(Schema);
-    /**
-       getting childrens from schema, childrens are subclases of schema
-    **/
-    //types = schema.getType("Event");
-    //console.log(types);
-    /**
-       creating list of options based on schema types
-    **/
-    //Form.createList(types);
+    // creating Schema from received json
+    SCHEMA.addJSON(json);
 }).fail(function (jqxhr, textStatus, error) {
     alert("unable to load jsonld!");
 });
 
+
+// This datatypes can be visualized as text
+// They have instances and are not only abstract types (like the type "DataType"
+// TODO (optional): Handle integer and datetime in more detail
+var TEXT_DATA_TYPES = ["Date", "DateTime", "Integer", "Number", "Text", "Time", "URL"]
 
 /*
  * Create property input fields when a schema.org thing is selected
@@ -37,10 +29,11 @@ $("#sel-thing").change(function () {
 
     // Load schema of selected Thing
     var selectedType = $(this).find(":selected").text();
-    var type = schema.getType(selectedType);
+    var type = SCHEMA.getType(selectedType);
 
     // Ids for handlers
-    var changeIDs = [];
+    var textIDs = [];
+    var checkIDs = [];
 
     // Visualize each property
     $.each(type.properties, function(index, value) {
@@ -48,7 +41,9 @@ $("#sel-thing").change(function () {
 	var capitalzedProperty = capitalizeFirstLetter(value);
 	var rowID = "1-" + value;
 	var html = "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">"
-	var dataTypes = schema.getPropertyDataTypes(value);
+	var dataTypes = SCHEMA.getPropertyDataTypes(value);
+	
+	// Construct selection
 	if (dataTypes.length > 1) {
 	    html += "<select class=\"sel-datatype\">" +
 		"<option disabled selected>Choose datatype</option>";
@@ -59,13 +54,22 @@ $("#sel-thing").change(function () {
 		"<label>" + 
 		capitalzedProperty + ":" +
 		"</label>";
-	} else {
+
+	// Construct input text field
+	} else if ($.inArray(dataTypes[0], TEXT_DATA_TYPES) !== -1) {
 	    var inputID = "input-" + rowID;
 	    html += "<input type=\"text\" id=\"" + inputID + "\">" +
 		"<label for=\"" + inputID + "\">" + 
 		capitalzedProperty + ":" + 
 		"</label>";
-	    changeIDs.push(inputID);
+	    textIDs.push(inputID);
+
+	// Construct checkbox for complex substructure
+	} else {
+	    var checkID = "check-" + rowID;
+	    html += "<input type=\"checkbox\" id=\"" + checkID + "\" class=\"sel-datatype\"/>" +
+		"<label for=\"" + checkID + "\">" + capitalzedProperty + "</label>";
+	    checkIDs.push(checkID);
 	}
 	html += "</div>";
 	
@@ -95,12 +99,19 @@ $("#sel-thing").change(function () {
     var json = { "@context": "http://schema.org",  "@type": selectedType };
     $("#json-ld-col").text(JSON.stringify(json, undefined, 4));
     
-    $.each(changeIDs, function(index, value) {
+    $.each(textIDs, function(index, value) {
 	$("#" + value).keyup(function(event) {
 	    var parentRow = $(this).closest(".properties-row");
 	    propertyChanges(parentRow.attr('id').split("-").slice(1).join("-"), $(this).val());
 	});
     });
+
+    /* $.each(checkIDs, function(index, value) {
+	$("#" + value).change(function(event) {
+	    var parentRow = $(this).closest(".properties-row");
+	    propertyChanges(parentRow.attr('id').split("-").slice(1).join("-"), $(this).val());
+	});
+    }); */
 
     // For complexer substructures
     selectionChanged();
@@ -111,8 +122,11 @@ $("#sel-thing").change(function () {
  */
 function selectionChanged() {
     $(".sel-datatype").change(function () {
+	var isCheckBox = ($(this).attr("type") === "checkbox");
+
 	// Do not consider select wrapper
-	if ($(this).hasClass("initialized") && !$(this).hasClass("select-wrapper")) {
+	if ($(this).hasClass("initialized") && !$(this).hasClass("select-wrapper") ||
+	   (isCheckBox)) {
 	    var parentRow = $(this).closest(".properties-row");
 
 	    var parentID = parentRow.attr("id");
@@ -123,98 +137,124 @@ function selectionChanged() {
 	    // Construct column
 	    var colID = "col" + "-" + (indent+1) + "-" + property;
 	    $("#" + colID).remove();
-	    var col = "<div id=\"" + colID + "\"" + "class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
 
-	    // Append column to div as new substructure
-	    parentRow.append(col);
-
-	    var selected = parentRow.find(":selected").text();
-	    if (selected === "Text" || selected === "URL" ) {
-		var rowID = (indent+1) + "-" + property;
-		var inputID = "input-" + rowID;
-		input_html = "<div id=\""+ rowID + "\" class=\"row properties-row input-field\">" +
-		    "<input type=\"text\" id=\"" + inputID + "\">" +
-		    "<label for=\"" + inputID + "\">" + 
-		    capitalizeFirstLetter(property) + ":" + 
-		    "</label>" + 
-		    "</div>";
-
-		$("#" + colID).append(input_html);
-		$("#" + colID).css("opacity", "0.0");
-		$("#" + colID).animate({opacity: 1.0}, 1000);
-
+	    if (isCheckBox && !$(this).is(':checked')) {
 		propertyChanges(property, "");
-		$("#" + inputID).keyup(function(event) {
-		    propertyChanges(property, $(this).val());
-		});
-	    } else if (selected === "Boolean") {
-		var rowID = (indent+1) + "-" + property;
-		var checkID = "check-" + rowID
-		input_html = "<div class=\"row properties-row input-field\">" +
-		    "<input type=\"checkbox\" id=\"" + checkID + "\" />" +
-		    "<label for=\"" + checkID + "\">" + property + "</label>" +
-		    "</div>";
-
-		$("#" + colID).append(input_html);
-		$("#" + colID).css("opacity", "0.0");
-		$("#" + colID).animate({opacity: 1.0}, 1000);
-
-		propertyChanges(property, "false");
-		$("#" + checkID).change(function() {
-		    propertyChanges(property, $(this).is(':checked').toString());
-		});
 	    } else {
-		var typeInside = schema.getType(selected);
-		var select_html = "";
-		var input_html = "";
-		var changeIDs = [];
-		$.each(typeInside.properties, function(index, value) {
-		    // Construct html
-		    var newProperty = property + "-" + value
-		    var capitalzedProperty = capitalizeFirstLetter(newProperty);
-		    var dataTypes = schema.getPropertyDataTypes(value);
-		    var rowID = (indent+1) + "-" + newProperty;
-		    if (dataTypes.length > 1) {
-			select_html += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
-			select_html += //"<div id=\"" + rowID + "\">" +
-			    "<select class=\"sel-datatype\">" +
-			    "<option disabled selected>Choose datatype</option>";
-			$.each(dataTypes, function(indexDatatype, valueDatatype) {
-			    select_html += "<option>" + valueDatatype + "</option>";
-			});
-			select_html += "</select>" +
-			    "<label>" + 
-			    capitalzedProperty + ":" +
-			    "</label>";
-			select_html += "</div>";
-		    } else {
-			var inputID = "input-" + rowID;
-			input_html += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
-			input_html += "<input type=\"text\" id=\""  + inputID + "\">" +
-			    "<label for=\"" + inputID + "\">" + 
-			    capitalzedProperty + ":" + 
-			    "</label>";
-			input_html += "</div>";
-			changeIDs.push(inputID);
-		    }
-		});
+		// Append column to div as new substructure
+		var col = "<div id=\"" + colID + "\"" + "class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
+		parentRow.append(col);
 
-		// First materialize selects, otherwise there is a ui problem
-		$("#" + colID).append(select_html);
-		$('select').material_select();
-		$("#" + colID).append(input_html);
-		$("#" + colID).css("opacity", "0.0");
-		$("#" + colID).animate({opacity: 1.0}, 1000);
+		var selected = parentRow.find(":selected").text();
+		if ($.inArray(selected, TEXT_DATA_TYPES) !== -1) {
+		    var rowID = (indent+1) + "-" + property;
+		    var inputID = "input-" + rowID;
+		    input_html = "<div id=\""+ rowID + "\" class=\"row properties-row input-field\">" +
+			"<input type=\"text\" id=\"" + inputID + "\">" +
+			"<label for=\"" + inputID + "\">" + 
+			capitalizeFirstLetter(property) + ":" + 
+			"</label>" + 
+			"</div>";
 
-		propertyChanges(capitalizeFirstLetter(property), selected, true);
-		$.each(changeIDs, function(index, value) {
-		    $("#" + value).keyup(function(event) {
-			var parentRow = $(this).closest(".properties-row");
-			propertyChanges(parentRow.attr('id').split("-").slice(1).join("-"), $(this).val());
+		    $("#" + colID).append(input_html);
+		    $("#" + colID).css("opacity", "0.0");
+		    $("#" + colID).animate({opacity: 1.0}, 1000);
+
+		    propertyChanges(property, "");
+		    $("#" + inputID).keyup(function(event) {
+			propertyChanges(property, $(this).val());
 		    });
-		});
+		} else if (selected === "Boolean") {
+		    var rowID = (indent+1) + "-" + property;
+		    var checkID = "check-" + rowID
+		    input_html = "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">" +
+			"<input type=\"checkbox\" id=\"" + checkID + "\" />" +
+			"<label for=\"" + checkID + "\">" + property + "</label>" +
+			"</div>";
 
-		selectionChanged();
+		    $("#" + colID).append(input_html);
+		    $("#" + colID).css("opacity", "0.0");
+		    $("#" + colID).animate({opacity: 1.0}, 1000);
+
+		    propertyChanges(property, "false");
+		    $("#" + checkID).change(function() {
+			propertyChanges(property, $(this).is(':checked').toString());
+		    });
+		} else {
+		    var type = "";
+		    if (isCheckBox) {
+			type = capitalizeFirstLetter(splittedID[splittedID.length - 1]);
+		    } else {
+			type = selected;
+		    }
+		    typeInside = SCHEMA.getType(type);
+
+		    // TODO: Handle if undefined
+		    if (typeInside === undefined) {
+			var test = SCHEMA.getPropertyDataTypes(splittedID[splittedID.length - 1]);
+		    }
+
+		    var select_html = "";
+		    var input_html = "";
+		    var changeIDs = [];
+		    $.each(typeInside.properties, function(index, value) {
+			// Construct html
+			var newProperty = property + "-" + value
+			var capitalzedProperty = capitalizeFirstLetter(newProperty);
+			var dataTypes = SCHEMA.getPropertyDataTypes(value);
+			var rowID = (indent+1) + "-" + newProperty;
+			if (dataTypes.length > 1) {
+			    select_html += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
+			    select_html += "<select class=\"sel-datatype\">" +
+				"<option disabled selected>Choose datatype</option>";
+			    $.each(dataTypes, function(indexDatatype, valueDatatype) {
+				select_html += "<option>" + valueDatatype + "</option>";
+			    });
+			    select_html += "</select>" +
+				"<label>" + 
+				capitalzedProperty + ":" +
+				"</label>";
+			    select_html += "</div>";
+			} else if($.inArray(dataTypes[0], TEXT_DATA_TYPES) !== -1) {
+			    var inputID = "input-" + rowID;
+			    input_html += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
+			    input_html += "<input type=\"text\" id=\"" + inputID + "\">" +
+				"<label for=\"" + inputID + "\">" + 
+				capitalzedProperty + ":" + 
+				"</label>";
+			    input_html += "</div>";
+			    changeIDs.push(inputID);
+			} else {
+			    var checkID = "check-" + rowID;
+			    input_html += "<div id=\"" + rowID + "\" class=\"row properties-row input-field\">";
+			    input_html += "<input type=\"checkbox\" id=\"" + checkID + "\" class=\"sel-datatype\"/>" +
+				"<label for=\"" + checkID + "\">" + capitalzedProperty + "</label>";
+			    input_html += "</div>";
+			}
+		    });
+
+		    // First materialize selects, otherwise there is a ui problem
+		    $("#" + colID).append(select_html);
+		    $('select').material_select();
+		    $("#" + colID).append(input_html);
+		    $("#" + colID).css("opacity", "0.0");
+		    $("#" + colID).animate({opacity: 1.0}, 1000);
+
+		    if (isCheckBox) {
+			propertyChanges(capitalizeFirstLetter(property), capitalizeFirstLetter(property), true);
+		    } else {
+			propertyChanges(capitalizeFirstLetter(property), selected, true);
+		    }
+		    $.each(changeIDs, function(index, value) {
+			$("#" + value).keyup(function(event) {
+			    var parentRow = $(this).closest(".properties-row");
+			    propertyChanges(parentRow.attr('id').split("-").slice(1).join("-"), $(this).val());
+			});
+		    });
+
+		    
+		    selectionChanged();
+		}
 	    }
 	}	
     });
@@ -234,7 +274,7 @@ function propertyChanges(property, value, selectChange=false) {
     if (selectChange === false) {
 	if (value.length == 0) {
 	    if (propertyArray.length === 1) {
-		delete json[property];
+		delete json[capitalizeFirstLetter(property)];
 	    } else {
 		// Eval workaround to access json on specified position
 		jsonAccess = "delete json";
@@ -245,7 +285,7 @@ function propertyChanges(property, value, selectChange=false) {
 	    }
 	} else {
 	    if (propertyArray.length === 1) {
-		json[property] = value;
+		json[capitalizeFirstLetter(property)] = value;
 	    } else {
 		// Eval workaround to access json on specified position
 		jsonAccess = "json";
@@ -258,7 +298,7 @@ function propertyChanges(property, value, selectChange=false) {
 	}
     } else {
 	if (value.length == 0) {
-	    json[property] = { "@type": value };
+	    json[capitalizeFirstLetter(property)] = { "@type": value };
 	} else {
 	    // Eval workaround to access json on specified position
 	    jsonAccess = "json";
