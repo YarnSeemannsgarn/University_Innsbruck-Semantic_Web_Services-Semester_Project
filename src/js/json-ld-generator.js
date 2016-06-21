@@ -83,7 +83,7 @@ $("#sel-thing").change(function () {
 		selectYears: true,
 		selectMonths: true,
 		onClose: function() { 
-		    propertyChanges(property.attr('id'), property.val());
+		    updateJSON(property.attr('id'), property.val());
 		}
 	    });	 
 	};   
@@ -100,7 +100,7 @@ $("#sel-thing").change(function () {
     $.each(textIDs, function(index, value) {
 	$("#" + value).keyup(function(event) {
 	    var parentRow = $(this).closest(".properties-row");
-	    propertyChanges(parentRow.attr('id').split("-").slice(1).join("-"), $(this).val());
+	    updateJSON(parentRow.attr('id').split("-").slice(1).join("-"), $(this).val());
 	});
     });
 
@@ -131,7 +131,7 @@ function selectionChanged() {
 	    $("#" + colID).remove();
 
 	    if (isCheckBox && !$(this).is(':checked')) {
-		propertyChanges(property, "");
+		updateJSON(property, "");
 	    } else {
 		// Append column to div as new substructure
 		var col = "<div id=\"" + colID + "\"" + "class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
@@ -152,9 +152,9 @@ function selectionChanged() {
 		    $("#" + colID).css("opacity", "0.0");
 		    $("#" + colID).animate({opacity: 1.0}, 1000);
 
-		    propertyChanges(property, "");
+		    updateJSON(property, "");
 		    $("#" + inputID).keyup(function(event) {
-			propertyChanges(property, $(this).val());
+			updateJSON(property, $(this).val());
 		    });
 		} else if (selected === "Boolean") {
 		    var rowID = (indent+1) + "-" + property;
@@ -168,9 +168,9 @@ function selectionChanged() {
 		    $("#" + colID).css("opacity", "0.0");
 		    $("#" + colID).animate({opacity: 1.0}, 1000);
 
-		    propertyChanges(property, "false");
+		    updateJSON(property, "false");
 		    $("#" + checkID).change(function() {
-			propertyChanges(property, $(this).is(':checked').toString());
+			updateJSON(property, $(this).is(':checked').toString());
 		    });
 		} else {
 		    var type = "";
@@ -181,7 +181,6 @@ function selectionChanged() {
 		    }
 		    typeInside = SCHEMA.getType(type);
 
-		    // TODO: Handle if undefined
 		    var htmls = { "select_html": "", "input_html": ""};
 		    var changeIDs = [];
 		    var checkboxPropertyType = "";
@@ -202,14 +201,14 @@ function selectionChanged() {
 		    $("#" + colID).animate({opacity: 1.0}, 1000);
 
 		    if (isCheckBox && checkboxPropertyType !== "") {
-			propertyChanges(capitalizeFirstLetter(property), checkboxPropertyType, true);
+			updateJSON(capitalizeFirstLetter(property), checkboxPropertyType, true);
 		    } else {
-			propertyChanges(capitalizeFirstLetter(property), type, true);
+			updateJSON(capitalizeFirstLetter(property), type, true);
 		    }
 		    $.each(changeIDs, function(index, value) {
 			$("#" + value).keyup(function(event) {
 			    var parentRow = $(this).closest(".properties-row");
-			    propertyChanges(parentRow.attr('id').split("-").slice(1).join("-"), $(this).val());
+			    updateJSON(parentRow.attr('id').split("-").slice(1).join("-"), $(this).val());
 			});
 		    });
 
@@ -266,7 +265,7 @@ function constructRowHTML(parentRow, property, htmls, changeIDs) {
 /*
  * Create JSON-LD on change
  */
-function propertyChanges(property, value, selectChange=false) {
+function updateJSON(property, value, selectChange=false) {
     console.log(property);
     console.log(value);
     var jsonText =  $("#json-ld-col").text().trim();
