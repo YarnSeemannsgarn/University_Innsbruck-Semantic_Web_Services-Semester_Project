@@ -184,14 +184,15 @@ function selectionChanged() {
 		    // TODO: Handle if undefined
 		    var htmls = { "select_html": "", "input_html": ""};
 		    var changeIDs = [];
-		    if (typeInside !== undefined) {
-			$.each(typeInside.properties, function(index, value) {
-			    constructRowHTML(parentRow, value, htmls, changeIDs);
-			});
-		    } else {
-			constructRowHTML(parentRow, splittedID[splittedID.length - 1], htmls, changeIDs, true);
+		    var checkboxPropertyType = "";
+		    if (typeInside === undefined) {
+			var dataTypes = SCHEMA.getPropertyDataTypes(splittedID[splittedID.length - 1]);
+			checkboxPropertyType = dataTypes[0]; // can only be one
+			typeInside = SCHEMA.getType(checkboxPropertyType);
 		    }
-
+		    $.each(typeInside.properties, function(index, value) {
+			constructRowHTML(parentRow, value, htmls, changeIDs);
+		    });
 
 		    // First materialize selects, otherwise there is a ui problem
 		    $("#" + colID).append(htmls["select_html"]);
@@ -200,10 +201,10 @@ function selectionChanged() {
 		    $("#" + colID).css("opacity", "0.0");
 		    $("#" + colID).animate({opacity: 1.0}, 1000);
 
-		    if (isCheckBox) {
-			propertyChanges(capitalizeFirstLetter(property), capitalizeFirstLetter(property), true);
+		    if (isCheckBox && checkboxPropertyType !== "") {
+			propertyChanges(capitalizeFirstLetter(property), checkboxPropertyType, true);
 		    } else {
-			propertyChanges(capitalizeFirstLetter(property), selected, true);
+			propertyChanges(capitalizeFirstLetter(property), type, true);
 		    }
 		    $.each(changeIDs, function(index, value) {
 			$("#" + value).keyup(function(event) {
@@ -220,7 +221,7 @@ function selectionChanged() {
     });
 }
 
-function constructRowHTML(parentRow, property, htmls, changeIDs, dataTypesAsNewProperty=false) {
+function constructRowHTML(parentRow, property, htmls, changeIDs) {
     // Construct html
     var parentID = parentRow.attr("id");
     var splittedID = parentID.split("-");
@@ -228,12 +229,8 @@ function constructRowHTML(parentRow, property, htmls, changeIDs, dataTypesAsNewP
     var parentProperties = splittedID.slice(1).join("-");
 
     var dataTypes = SCHEMA.getPropertyDataTypes(property);
-    var properties = "";
-    if (dataTypesAsNewProperty) {
-	properties = parentProperties + "-" + dataTypes[0];
-    } else {
-	properties = parentProperties + "-" + property;
-    }
+    var properties = parentProperties + "-" + property;
+
     var capitalizedProperties = capitalizeFirstLetter(properties);
     var rowID = (indent+1) + "-" + properties;
     if (dataTypes.length > 1) {
