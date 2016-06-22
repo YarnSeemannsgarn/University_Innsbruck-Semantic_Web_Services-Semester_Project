@@ -25,7 +25,7 @@ var TEXT_DATA_TYPES = ["Date", "DateTime", "Integer", "Number", "Text", "Time", 
  */
 $("#sel-thing").change(function () {
     // Remove precreated input fields
-    $(".properties-row").remove();
+    $("#properties-col").empty();
 
     // Load schema of selected Thing
     var selectedType = $(this).find(":selected").text();
