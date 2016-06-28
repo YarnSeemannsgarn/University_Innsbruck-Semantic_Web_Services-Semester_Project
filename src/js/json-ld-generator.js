@@ -219,6 +219,9 @@ function selectionChanged() {
     });
 }
 
+/*
+ * Construct row html
+ */
 function constructRowHTML(parentRow, property, htmls, changeIDs) {
     // Construct html
     var parentID = parentRow.attr("id");
