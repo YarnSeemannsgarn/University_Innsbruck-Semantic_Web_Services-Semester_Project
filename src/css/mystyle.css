@@ -13,3 +13,7 @@
 .properties-row {
     padding: 0 0.75rem;
 }
+
+.ld .container{
+    width: 90%;
+}
