@@ -133,7 +133,7 @@ function selectionChanged() {
 		updateJSON(property, "");
 	    } else {
 		// Append column to div as new substructure
-		var col = "<div id=\"" + colID + "\"" + "class=\"col m" + (12-indent) + " offset-m" + indent + " orange lighten-3\"></div>";
+		var col = "<div id=\"" + colID + "\"" + "class=\"col m" + (12-indent) + " offset-m" + indent + " blue lighten-5\"></div>";
 		parentRow.append(col);
 
 		var selected = parentRow.find(":selected").text();
